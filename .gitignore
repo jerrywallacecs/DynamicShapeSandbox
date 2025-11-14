@@ -39,3 +39,11 @@
 
 # debug information files
 *.dwo
+
+# vs generated files
+.vs
+build/
+out/
+*/.sln
+*/.vcxproj
+*/.vxcproj.user
