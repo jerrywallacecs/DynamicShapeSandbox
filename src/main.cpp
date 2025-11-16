@@ -30,12 +30,14 @@ int main(int argc, char* argv[])
 	std::ifstream fin(filename);
 	std::string section;
 
-	// default values to avoid using uninitialized memory + just a good idea
+	// window variables
 	uint16_t windowWidth = 1280;
 	uint16_t windowHeight = 720;
 
-	std::string temp;
-	std::string temp2;
+	// font variables
+	std::string fontFile;
+	int fontSize;
+	int fontRed, fontGreen, fontBlue;
 
 	if (!fin)
 	{
@@ -52,16 +54,11 @@ int main(int argc, char* argv[])
 
 		if (section == "Font")
 		{
-			fin >> temp >> temp2;
-			std::cout << temp << '\n';
+			fin >> fontFile >> fontSize >> fontRed >> fontGreen >> fontBlue;
 		}
 	}
 
-	// create a new window of size w*h pixels
-	// top-left of the window is (0,0) and bottom-right is (w,h)
-	// you will have to read these from the config file
-	const uint16_t wWidth = windowWidth;
-	const uint16_t wHeight = windowHeight;
+	sf::Color fontColor(fontRed, fontGreen, fontBlue, 255);
 
 	// as of sfml 3, sf::VideoMode now takes in a single object instead of sepeate ints
 	auto window = sf::RenderWindow(sf::VideoMode({ windowWidth, windowHeight }), "Assignment 1 | SFML + ImGui");
@@ -106,7 +103,7 @@ int main(int argc, char* argv[])
 	sf::Font myFont;
 
 	// attempt to load the font from a file
-	if (!myFont.openFromFile("fonts/airstrike.ttf"))
+	if (!myFont.openFromFile(fontFile))
 	{
 		// if we can't load the font, print an error to the console and exit
 		std::cout << "Could not load font!\n";
@@ -114,11 +111,12 @@ int main(int argc, char* argv[])
 	}
 
 	// set up the text object that will be drawn in the bottom of the screen
-	sf::Text text(myFont, "Sample Text", 24);
+	sf::Text text(myFont, "Sample Text", fontSize);
 
 	// position the top-left corner of the text so that the text aligns on the bottom
 	// text character size is in pixels, so move the text up from the bottom by its height
-	text.setPosition({ 0, wHeight - (float)text.getCharacterSize() });
+	text.setPosition({ 0, windowHeight - (float)text.getCharacterSize() });
+	text.setFillColor(fontColor);
 
 	// set up a character array to set the text
 	char displayString[255] = "Sample Text";
@@ -210,12 +208,12 @@ int main(int argc, char* argv[])
 		// circle.getPosition() + circleDiameter for bottom and right
 		// circle.getPosition() for top and left
 
-		if (circle.getPosition().x < 0 || circle.getPosition().x + circleDiameter > wWidth)
+		if (circle.getPosition().x < 0 || circle.getPosition().x + circleDiameter > windowWidth)
 		{
 			circleSpeedX *= -1;
 		}
 
-		if (circle.getPosition().y < 0 || circle.getPosition().y + circleDiameter > wHeight)
+		if (circle.getPosition().y < 0 || circle.getPosition().y + circleDiameter > windowHeight)
 		{
 			circleSpeedY *= -1;
 		}
