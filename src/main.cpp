@@ -21,16 +21,36 @@ int main(int argc, char* argv[])
 	// font variables
 	std::string fontFile;
 	int fontSize{ 0 };
-	int fontRGB[3] = { 255, 255, 255 };
+	int fontRGB[3] = { 0, 0, 0 };
 
-	std::string shapeName;
-	float initialPosX{};
-	float initialPosY{};
-	float initialSpeedX{};
-	float initialSpeedY{};
-	int shapeRGB[3] = { 255, 255, 255 };
+	struct shapeInfo
+	{
+		std::string name;
 
+		float initialPosX{};
+		float initialPosY{};
 
+		float initialSpeedX{};
+		float initialSpeedY{};
+
+		unsigned int rgb[3] = { 255, 255, 255 };
+		sf::Color rgbColor;
+
+		float widthHeight[2] = { 0, 0 };
+		float radius = 0;
+
+		sf::RectangleShape rectangle;
+		sf::CircleShape circle;
+
+		bool hasRectangle = false;
+		bool hasCircle = false;
+		bool drawRectangle = true;
+		bool drawCircle = true;
+	};
+
+	// container for all shapes
+	std::vector<shapeInfo> shapes = {};
+	
 	if (!fin)
 	{
 		std::cerr << "could not open file" << '\n' << "current working dir: " << std::filesystem::current_path() << '\n';
@@ -47,6 +67,22 @@ int main(int argc, char* argv[])
 		if (section == "Font")
 		{
 			fin >> fontFile >> fontSize >> fontRGB[0] >> fontRGB[1] >> fontRGB[2];
+		}
+
+		if (section == "Rectangle")
+		{
+			shapeInfo info;
+			
+			fin >> info.name >> info.initialPosX >> info.initialPosY >> info.initialSpeedX >> info.initialSpeedY >> info.rgb[0] >> info.rgb[1] >> info.rgb[2] >> info.widthHeight[0] >> info.widthHeight[1];
+
+			sf::RectangleShape rectangle({ info.widthHeight[0], info.widthHeight[1] });
+			info.rectangle = rectangle;
+
+			info.hasRectangle = true;
+
+			info.rgbColor = sf::Color(static_cast<uint8_t>(info.rgb[0]), static_cast<uint8_t>(info.rgb[1]), static_cast<uint8_t>(info.rgb[2]));
+
+			shapes.push_back(info);
 		}
 	}
 
@@ -78,18 +114,16 @@ int main(int argc, char* argv[])
 	bool drawCircle = true; // whether or not to draw the circle
 	bool drawText = true; // whether or not to draw the text
 
-	float rectangleWidth = 50;
-	float rectangleHeight = 50;
-	float rectangleSpeedX = 1.0f;
-	float rectangleSpeedY = 0.5f;
-	bool drawRectangle = true;
-
 	// create the sfml circle shape based on our params
 	sf::CircleShape circle(circleRadius, circleSegments);
 	circle.setPosition({ 10.0f, 10.0f });
 
-	sf::RectangleShape rectangle({ rectangleWidth, rectangleHeight });
-	rectangle.setPosition({ 50.0f, 50.0f });
+	// we should probably switch to class implementation, as a constructor would be useful
+	for (int i = 0; i < shapes.size(); ++i)
+	{
+		shapes[i].rectangle.setPosition({ shapes[i].initialPosX, shapes[i].initialPosY });
+		shapes[i].rectangle.setFillColor(shapes[i].rgbColor);
+	}
 
 	// load a font so we can display some text
 	sf::Font myFont;
@@ -158,15 +192,9 @@ int main(int argc, char* argv[])
 		ImGui::SliderFloat("circle x speed", &circleSpeedX, -15.0f, 15.0f);
 		ImGui::SliderFloat("circle y speed", &circleSpeedY, -15.0f, 15.0f);
 
-		ImGui::Text("Rectangle Settings");
-		ImGui::Checkbox("draw rectangle", &drawRectangle);
-		ImGui::SliderFloat("rectangle width", &rectangleWidth, 1, 100);
-		ImGui::SliderFloat("rectangle height", &rectangleHeight, 1, 100);
-		ImGui::SliderFloat("rectangle x speed", &rectangleSpeedX, -15.0f, 15.0f);
-		ImGui::SliderFloat("rectangle y speed", &rectangleSpeedY, -15.0f, 15.0f);
-
-
-
+		// debug ui
+		ImGui::Checkbox("draw first rectangle in shapes", &shapes[0].drawRectangle);
+		ImGui::Checkbox("draw second rectangle in shapes", &shapes[1].drawRectangle);
 
 		ImGui::ColorEdit3("color circle", c);
 		ImGui::InputText("text", displayString, 255);
@@ -185,8 +213,6 @@ int main(int argc, char* argv[])
 		circle.setPointCount(circleSegments);
 		circle.setRadius(circleRadius);
 		float circleDiameter = circleRadius * 2;
-
-		rectangle.setSize({ rectangleWidth, rectangleHeight });
 
 		// imgui uses 0-1 float for colors, sfml uses 0-255 for colors
 		// we must convert from the ui floats to sfml uint8_t
@@ -218,14 +244,24 @@ int main(int argc, char* argv[])
 			window.draw(circle);
 		}
 
-		if (drawRectangle)
-		{
-			window.draw(rectangle);
-		}
-
 		if (drawText)
 		{
 			window.draw(text);
+		}
+
+		// iterate through the vector and draw the shapes
+		for (int i = 0; i < shapes.size(); ++i)
+		{
+			if (shapes[i].hasRectangle)
+			{
+				if (shapes[i].drawRectangle)
+					window.draw(shapes[i].rectangle);
+			}
+
+			if (shapes[i].hasCircle)
+			{
+				window.draw(shapes[i].circle);
+			}
 		}
 
 		ImGui::SFML::Render(window); // draw the ui last so it's on top
