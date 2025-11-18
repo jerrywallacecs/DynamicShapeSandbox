@@ -1,5 +1,7 @@
 # COMP 4300 - Assignment 1
 
+<img width="1274" height="716" alt="image" src="https://github.com/user-attachments/assets/e961bba8-ef12-426b-8054-1a126186c86f" />
+
 ## Program Specification
 This is a c++ program using the sfml library which will read
 descriptions of shapes from a configuration file, and then draw those shapes
