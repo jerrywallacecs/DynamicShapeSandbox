@@ -50,14 +50,29 @@ int main(int argc, char* argv[])
 
 		void init(float posx, float posy, sf::Color rgb)
 		{
-			rectangle.setPosition({ posx, posy });
-			rectangle.setFillColor(rgb);
+			if (hasRectangle)
+			{
+				std::cout << "rect" << '\n';
+				rectangle.setPosition({ posx, posy });
+				rectangle.setFillColor(rgb);
+			}
+
+			if (hasCircle)
+			{
+				std::cout << "circle" << '\n';
+				circle.setPosition({ posx, posy });
+				circle.setFillColor(rgb);
+			}
 		}
 
 		void animate(float speedx, float speedy)
 		{
-			rectangle.setPosition({ rectangle.getPosition().x + speedx, rectangle.getPosition().y + speedy });
+			if (hasRectangle)
+				rectangle.setPosition({ rectangle.getPosition().x + speedx, rectangle.getPosition().y + speedy });
+			if (hasCircle)
+				circle.setPosition({ circle.getPosition().x + speedx, circle.getPosition().y + speedy });
 		}
+
 	};
 
 	// container for all shapes
@@ -90,6 +105,25 @@ int main(int argc, char* argv[])
 			sf::RectangleShape rectangle({ info.widthHeight[0], info.widthHeight[1] });
 			info.rectangle = rectangle;
 			info.hasRectangle = true;
+
+			info.rgbColor = sf::Color(static_cast<uint8_t>(info.rgb[0]), static_cast<uint8_t>(info.rgb[1]), static_cast<uint8_t>(info.rgb[2]));
+
+			info.init(info.initialPosX, info.initialPosY, info.rgbColor);
+
+			shapes.push_back(info);
+		}
+
+		if (section == "Circle")
+		{
+			shapeInfo info;
+
+			fin >> info.name >> info.initialPosX >> info.initialPosY >> info.initialSpeedX >> info.initialSpeedY >> info.rgb[0] >> info.rgb[1] >> info.rgb[2] >> info.radius;
+
+			constexpr int segments = 32;
+			sf::CircleShape circle(info.radius, segments);
+			info.circle = circle;
+			info.hasCircle = true;
+
 
 			info.rgbColor = sf::Color(static_cast<uint8_t>(info.rgb[0]), static_cast<uint8_t>(info.rgb[1]), static_cast<uint8_t>(info.rgb[2]));
 
@@ -245,6 +279,27 @@ int main(int argc, char* argv[])
 		if (circle.getPosition().y < 0 || circle.getPosition().y + circleDiameter > windowHeight)
 		{
 			circleSpeedY *= -1;
+		}
+
+		for (int i = 0; i < shapes.size(); ++i)
+		{
+			if (shapes[i].hasRectangle)
+			{
+				if (shapes[i].rectangle.getPosition().x < 0 || shapes[i].rectangle.getPosition().x + shapes[i].widthHeight[0] > windowWidth)
+					shapes[i].initialSpeedX *= -1;
+
+				if (shapes[i].rectangle.getPosition().y < 0 || shapes[i].rectangle.getPosition().y + shapes[i].widthHeight[1] > windowHeight)
+					shapes[i].initialSpeedY *= -1;
+			}
+
+			if (shapes[i].hasCircle)
+			{
+				if (shapes[i].circle.getPosition().x < 0 || shapes[i].circle.getPosition().x + (2 * shapes[i].radius) > windowWidth)
+					shapes[i].initialSpeedX *= -1;
+
+				if (shapes[i].circle.getPosition().y < 0 || shapes[i].circle.getPosition().y + (2 * shapes[i].radius) > windowHeight)
+					shapes[i].initialSpeedY *= -1;
+			}
 		}
 
 		// RENDERING
