@@ -30,14 +30,15 @@ int main(int argc, char* argv[])
 		float initialPosX{};
 		float initialPosY{};
 
-		float initialSpeedX{};
-		float initialSpeedY{};
+		float speedX{};
+		float speedY{};
 
 		unsigned int rgb[3] = { 255, 255, 255 };
 		sf::Color rgbColor;
 
 		float widthHeight[2] = { 0, 0 };
 		float radius = 0;
+		int segments = 32;
 
 		sf::RectangleShape rectangle;
 		sf::CircleShape circle;
@@ -45,8 +46,7 @@ int main(int argc, char* argv[])
 		bool hasRectangle = false;
 		bool hasCircle = false;
 
-		bool drawRectangle = true;
-		bool drawCircle = true;
+		bool drawShape = true;
 
 		void init(float posx, float posy, sf::Color rgb)
 		{
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 		{
 			shapeInfo info;
 			
-			fin >> info.name >> info.initialPosX >> info.initialPosY >> info.initialSpeedX >> info.initialSpeedY >> info.rgb[0] >> info.rgb[1] >> info.rgb[2] >> info.widthHeight[0] >> info.widthHeight[1];
+			fin >> info.name >> info.initialPosX >> info.initialPosY >> info.speedX >> info.speedY >> info.rgb[0] >> info.rgb[1] >> info.rgb[2] >> info.widthHeight[0] >> info.widthHeight[1];
 
 			sf::RectangleShape rectangle({ info.widthHeight[0], info.widthHeight[1] });
 			info.rectangle = rectangle;
@@ -117,10 +117,9 @@ int main(int argc, char* argv[])
 		{
 			shapeInfo info;
 
-			fin >> info.name >> info.initialPosX >> info.initialPosY >> info.initialSpeedX >> info.initialSpeedY >> info.rgb[0] >> info.rgb[1] >> info.rgb[2] >> info.radius;
+			fin >> info.name >> info.initialPosX >> info.initialPosY >> info.speedX >> info.speedY >> info.rgb[0] >> info.rgb[1] >> info.rgb[2] >> info.radius;
 
-			constexpr int segments = 32;
-			sf::CircleShape circle(info.radius, segments);
+			sf::CircleShape circle(info.radius, info.segments);
 			info.circle = circle;
 			info.hasCircle = true;
 
@@ -162,8 +161,8 @@ int main(int argc, char* argv[])
 	bool drawText = true; // whether or not to draw the text
 
 	// create the sfml circle shape based on our params
-	sf::CircleShape circle(circleRadius, circleSegments);
-	circle.setPosition({ 10.0f, 10.0f });
+	//sf::CircleShape circle(circleRadius, circleSegments);
+	//circle.setPosition({ 10.0f, 10.0f });
 
 	// load a font so we can display some text
 	sf::Font myFont;
@@ -203,6 +202,7 @@ int main(int argc, char* argv[])
 			}
 
 			// this event is triggered when a key is pressed
+			/*
 			if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
 			{
 				// print the key that was pressed to the console
@@ -213,6 +213,7 @@ int main(int argc, char* argv[])
 					circleSpeedX *= -1.0f;
 				}
 			}
+			*/
 		}
 
 		// update imgui for this frame with the time that the last frame took
@@ -223,18 +224,39 @@ int main(int argc, char* argv[])
 		ImGui::Text("window text");
 
 		// with intermediate mode (imgui), we just pass in the name and a pointer to the variable it operates on
-		ImGui::Text("Circle Settings");
-		ImGui::Checkbox("draw circle", &drawCircle);
-		ImGui::SameLine();
-		ImGui::Checkbox("draw text", &drawText);
-		ImGui::SliderFloat("radius", &circleRadius, 0.0f, 300.0f);
-		ImGui::SliderInt("sides", &circleSegments, 3, 64);
-		ImGui::SliderFloat("circle x speed", &circleSpeedX, -15.0f, 15.0f);
-		ImGui::SliderFloat("circle y speed", &circleSpeedY, -15.0f, 15.0f);
+		//ImGui::Text("Circle Settings");
+		//ImGui::Checkbox("draw circle", &drawCircle);
+		//ImGui::SameLine();
+		//ImGui::Checkbox("draw text", &drawText);
+		//ImGui::SliderFloat("radius", &circleRadius, 0.0f, 300.0f);
+		//ImGui::SliderInt("sides", &circleSegments, 3, 64);
+		//ImGui::SliderFloat("circle x speed", &circleSpeedX, -15.0f, 15.0f);
+		//ImGui::SliderFloat("circle y speed", &circleSpeedY, -15.0f, 15.0f);
+
+		for (int i = 0; i < shapes.size(); ++i)
+		{
+			if (shapes[i].hasRectangle)
+			{
+				ImGui::PushID(i); // unique ID for checkbox
+				ImGui::Checkbox("draw rectangle", &shapes[i].drawShape);
+				ImGui::PopID();
+			}
+
+			if (shapes[i].hasCircle)
+			{
+				ImGui::PushID(i); // unique ID for checkbox
+				ImGui::Checkbox("draw circle", &shapes[i].drawShape);
+				ImGui::SliderInt("sides", &shapes[i].segments, 3, 64);
+				ImGui::SliderFloat("circle x speed", &shapes[i].speedX, -15.0f, 15.0f);
+				ImGui::SliderFloat("circle y speed", &shapes[i].speedY, -15.0f, 15.0f);
+				ImGui::PopID();
+			}
+				
+		}
 
 		// debug ui
-		ImGui::Checkbox("draw first rectangle in shapes", &shapes[0].drawRectangle);
-		ImGui::Checkbox("draw second rectangle in shapes", &shapes[1].drawRectangle);
+		//ImGui::Checkbox("draw first rectangle in shapes", &shapes[0].drawRectangle);
+		//ImGui::Checkbox("draw second rectangle in shapes", &shapes[1].drawRectangle);
 
 		ImGui::ColorEdit3("color circle", c);
 		ImGui::InputText("text", displayString, 255);
@@ -243,34 +265,41 @@ int main(int argc, char* argv[])
 			text.setString(displayString);
 		}
 		ImGui::SameLine();
+		/*
 		if (ImGui::Button("reset circle"))
 		{
 			circle.setPosition({ 0,0 });
 		}
+		*/
 		ImGui::End();
 
 		// set the circle properties, because they may have been updated with the ui
-		circle.setPointCount(circleSegments);
-		circle.setRadius(circleRadius);
-		float circleDiameter = circleRadius * 2;
+		//circle.setPointCount(circleSegments);
+		//circle.setRadius(circleRadius);
+		//float circleDiameter = circleRadius * 2;
 
 		// imgui uses 0-1 float for colors, sfml uses 0-255 for colors
 		// we must convert from the ui floats to sfml uint8_t
-		circle.setFillColor(sf::Color(uint8_t(c[0] * 255), uint8_t(c[1] * 255), uint8_t(c[2] * 255)));
+		//circle.setFillColor(sf::Color(uint8_t(c[0] * 255), uint8_t(c[1] * 255), uint8_t(c[2] * 255)));
 
 		// basic animation - move the circle each frame if it's still in frame
-		circle.setPosition({ circle.getPosition().x + circleSpeedX, circle.getPosition().y + circleSpeedY });
+		//circle.setPosition({ circle.getPosition().x + circleSpeedX, circle.getPosition().y + circleSpeedY });
 
 		for (int i = 0; i < shapes.size(); ++i)
 		{
-			shapes[i].animate(shapes[i].initialSpeedX, shapes[i].initialSpeedY);
+			shapes[i].animate(shapes[i].speedX, shapes[i].speedY);
+			
+			if (shapes[i].hasCircle)
+			{
+				shapes[i].circle.setPointCount(shapes[i].segments);
+			}
 		}
 
 
 		// COLLISION HANDLING
 		// circle.getPosition() + circleDiameter for bottom and right
 		// circle.getPosition() for top and left
-
+		/*
 		if (circle.getPosition().x < 0 || circle.getPosition().x + circleDiameter > windowWidth)
 		{
 			circleSpeedX *= -1;
@@ -280,35 +309,37 @@ int main(int argc, char* argv[])
 		{
 			circleSpeedY *= -1;
 		}
+		*/
 
 		for (int i = 0; i < shapes.size(); ++i)
 		{
 			if (shapes[i].hasRectangle)
 			{
 				if (shapes[i].rectangle.getPosition().x < 0 || shapes[i].rectangle.getPosition().x + shapes[i].widthHeight[0] > windowWidth)
-					shapes[i].initialSpeedX *= -1;
+					shapes[i].speedX *= -1;
 
 				if (shapes[i].rectangle.getPosition().y < 0 || shapes[i].rectangle.getPosition().y + shapes[i].widthHeight[1] > windowHeight)
-					shapes[i].initialSpeedY *= -1;
+					shapes[i].speedY *= -1;
 			}
 
 			if (shapes[i].hasCircle)
 			{
 				if (shapes[i].circle.getPosition().x < 0 || shapes[i].circle.getPosition().x + (2 * shapes[i].radius) > windowWidth)
-					shapes[i].initialSpeedX *= -1;
+					shapes[i].speedX *= -1;
 
 				if (shapes[i].circle.getPosition().y < 0 || shapes[i].circle.getPosition().y + (2 * shapes[i].radius) > windowHeight)
-					shapes[i].initialSpeedY *= -1;
+					shapes[i].speedY *= -1;
 			}
 		}
 
 		// RENDERING
 		window.clear(); // clear the window of anything previously drawn
-
+		/*
 		if (drawCircle) // draw the circle if the boolean is true
 		{
 			window.draw(circle);
 		}
+		*/
 
 		if (drawText)
 		{
@@ -320,13 +351,14 @@ int main(int argc, char* argv[])
 		{
 			if (shapes[i].hasRectangle)
 			{
-				if (shapes[i].drawRectangle)
+				if (shapes[i].drawShape)
 					window.draw(shapes[i].rectangle);
 			}
 
 			if (shapes[i].hasCircle)
 			{
-				window.draw(shapes[i].circle);
+				if (shapes[i].drawShape)
+					window.draw(shapes[i].circle);
 			}
 		}
 
