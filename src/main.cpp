@@ -139,9 +139,8 @@ int main(int argc, char* argv[])
 
 	sf::Color fontColor(fontRGB[0], fontRGB[1], fontRGB[2], 255);
 
-	// as of sfml 3, sf::VideoMode now takes in a single object instead of sepeate ints
 	auto window = sf::RenderWindow(sf::VideoMode({ windowWidth, windowHeight }), "Assignment 1 | SFML + ImGui");
-	window.setFramerateLimit(60); // limit frame rate to 60fps
+	window.setFramerateLimit(60);
 
 	// initialize imgui and create a clock used for its internal timing
 	if (!ImGui::SFML::Init(window))
@@ -152,30 +151,13 @@ int main(int argc, char* argv[])
 
 	sf::Clock deltaClock;
 
-	// the imgui color {r, g, b} wheel requires floats from 0-1
-	// sfml will require instead of uint8_t from 0-255
-	// this is the only really annoying conversion between sfml and imgui
-	float c[3] = { 0.0f, 1.0f, 1.0f };
-
-	// lets make a shape that we will draw to the screen
-	float circleRadius = 50; // radius to draw the circle
-	int circleSegments = 32; // number of segments to draw the circle with
-	float circleSpeedX = 1.0f; // we will use this to move the circle later
-	float circleSpeedY = 0.5f; // we will read these values from the file
-	bool drawCircle = true; // whether or not to draw the circle
 	bool drawText = true; // whether or not to draw the text
 
-	// create the sfml circle shape based on our params
-	//sf::CircleShape circle(circleRadius, circleSegments);
-	//circle.setPosition({ 10.0f, 10.0f });
-
-	// load a font so we can display some text
 	sf::Font myFont;
 
 	// attempt to load the font from a file
 	if (!myFont.openFromFile(fontFile))
 	{
-		// if we can't load the font, print an error to the console and exit
 		std::cerr << "Could not load font!\n";
 		std::exit(-1);
 	}
@@ -244,6 +226,14 @@ int main(int argc, char* argv[])
 			{
 				ImGui::PushID(i); // unique ID for checkbox
 				ImGui::Checkbox("draw rectangle", &shapes[i].drawShape);
+				ImGui::SliderFloat2("rectangle velocity", shapes[i].velocity, -5.0f, 5.0f);
+
+				ImGui::ColorEdit3("rectangle color", shapes[i].guiRGB);
+
+				if (ImGui::Button("reset rectangle"))
+				{
+					shapes[i].rectangle.setPosition({ shapes[i].initialPosition[0], shapes[i].initialPosition[1] });
+				}
 				ImGui::PopID();
 			}
 
@@ -265,66 +255,33 @@ int main(int argc, char* argv[])
 				
 		}
 
-		// debug ui
-		//ImGui::Checkbox("draw first rectangle in shapes", &shapes[0].drawRectangle);
-		//ImGui::Checkbox("draw second rectangle in shapes", &shapes[1].drawRectangle);
-
-		ImGui::ColorEdit3("color circle", c);
 		ImGui::InputText("text", displayString, 255);
 		if (ImGui::Button("set text"))
 		{
 			text.setString(displayString);
 		}
-		ImGui::SameLine();
-		/*
-		if (ImGui::Button("reset circle"))
-		{
-			circle.setPosition({ 0,0 });
-		}
-		*/
-		ImGui::End();
 
 		// set the circle properties, because they may have been updated with the ui
-		//circle.setPointCount(circleSegments);
-		//circle.setRadius(circleRadius);
-		//float circleDiameter = circleRadius * 2;
-
-		// imgui uses 0-1 float for colors, sfml uses 0-255 for colors
-		// we must convert from the ui floats to sfml uint8_t
-		//circle.setFillColor(sf::Color(uint8_t(c[0] * 255), uint8_t(c[1] * 255), uint8_t(c[2] * 255)));
-
-		// basic animation - move the circle each frame if it's still in frame
-		//circle.setPosition({ circle.getPosition().x + circleSpeedX, circle.getPosition().y + circleSpeedY });
-
 		for (int i = 0; i < shapes.size(); ++i)
 		{
+			// basic animation - move the circle each frame if it's still in frame
 			shapes[i].animate(shapes[i].velocity[0], shapes[i].velocity[1]);
 			
+			// imgui uses 0-1 float for colors, sfml uses 0-255 for colors
+			// we must convert from the ui floats to sfml uint8_t
 			if (shapes[i].hasCircle)
 			{
 				shapes[i].circle.setPointCount(shapes[i].segments);
 				shapes[i].circle.setFillColor(sf::Color(uint8_t(shapes[i].guiRGB[0] * 255), uint8_t(shapes[i].guiRGB[1] * 255), uint8_t(shapes[i].guiRGB[2] * 255)));
 			}
 
-			
+			if (shapes[i].hasRectangle)
+			{
+				shapes[i].rectangle.setFillColor(sf::Color(uint8_t(shapes[i].guiRGB[0] * 255), uint8_t(shapes[i].guiRGB[1] * 255), uint8_t(shapes[i].guiRGB[2] * 255)));
+			}
 		}
 
-
-		// COLLISION HANDLING
-		// circle.getPosition() + circleDiameter for bottom and right
-		// circle.getPosition() for top and left
-		/*
-		if (circle.getPosition().x < 0 || circle.getPosition().x + circleDiameter > windowWidth)
-		{
-			circleSpeedX *= -1;
-		}
-
-		if (circle.getPosition().y < 0 || circle.getPosition().y + circleDiameter > windowHeight)
-		{
-			circleSpeedY *= -1;
-		}
-		*/
-
+		// handle velocity
 		for (int i = 0; i < shapes.size(); ++i)
 		{
 			if (shapes[i].hasRectangle)
@@ -347,13 +304,7 @@ int main(int argc, char* argv[])
 		}
 
 		// RENDERING
-		window.clear(); // clear the window of anything previously drawn
-		/*
-		if (drawCircle) // draw the circle if the boolean is true
-		{
-			window.draw(circle);
-		}
-		*/
+		window.clear();
 
 		if (drawText)
 		{
