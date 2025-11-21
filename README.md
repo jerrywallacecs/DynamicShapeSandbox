@@ -24,7 +24,7 @@ the application.
 	- Select any shape from a list
 	- Toggle visibility
 	- Adjust scale (0.1x - 5.0x)
-	- Modify velocity components (+-8 units/frame independently for X and Y)
+	- Modify velocity components (+/- 5 units/frame independently for X and Y)
 	- Change fill color (RGB)
 	- Edit the shape's displayed name
 
