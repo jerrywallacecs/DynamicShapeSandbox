@@ -1,4 +1,4 @@
-# Dynamic Shape Animation with SFML and ImGui
+# Dynamic Shape Sandbox
 
 <img width="1277" height="721" alt="Screenshot 2025-11-21 011027" src="https://github.com/user-attachments/assets/6447111f-5c31-413b-85d2-ee6049761346" />
 
