@@ -1,80 +1,57 @@
-# COMP 4300 - Assignment 1
+# Dynamic Shape Animation with SFML and ImGui
 
 <img width="1274" height="716" alt="image" src="https://github.com/user-attachments/assets/e961bba8-ef12-426b-8054-1a126186c86f" />
 
-## Program Specification
-This is a c++ program using the sfml library which will read
-descriptions of shapes from a configuration file, and then draw those shapes
-to the screen. Each shape will have the following:
-- name
-- position
-- speed
-- color
-- width
-- height
-- radius (circle)
+## Overview
+This C++ application demonstates real-time 2D animation and interactive editing using
+SFML (Simple and Fast Multimedia Library) for rendering and Dear ImGui for an immediate-mode
+graphical user interface.
 
-The shapes should "bounce" off the sides of the window which contains them.
-Each shape's name should be drawn on the exact center of the shape in the given
-font size and color specified in the file.
+The program reads a configuration file that describes a collection of geometric shapes
+(rectangles and circles). Upon launch, each shape is instantiated with its specified position,
+velocity, color, size, and name. The shapes move continously within the window and "bounce" off
+the boundaries using collision detection based on their global bounding boxes.
 
-We are also using an ImGui user interface which is able to:
-- list all shapes and select any one of them to edit their properties
-- toggle whether or not the selected shape will be drawn
-- change the scale of the shape (0 to 4)
-- change the x and y velocity of the shape (-8 to 8)
-- change the color of the shape
-- change the name of the shape
+Every shape displays its name centered inside it, renderered with a user-defined font, size, and color.
 
-## Configuration File Specification
-Each line of the configuration file specifies one of the config settings
-of the program, with the first string in each line being the type of setting
-that the rest of the line specifies. Lines in the config file can be one of
-the following types, and lines can appear in any order in the file.
+A floating ImGui control panel provides full runtime manipulation of the scene without restarting
+the application.
 
-Window W H
-- This line declares that the SFML Window must be constructed with width W
-and height H, each of which will be integers
+## Features
+- **Configuration-driven scene**: All window parameters, fonts, and shapes are loaded from a plain text file
+- **Physics simulation**: Constant-velocity movement with perfect reflection on window edges.
+- **Dynamic shape editing via ImGui**: 
+	- Select any shape from a list
+	- Toggle visibility
+	- Adjust scale (0.1x - 5.0x)
+	- Modify velocity components (+-8 units/frame independently for X and Y)
+	- Change fill color (RGB)
+	- Edit the shape's displayed name
 
-Font F S R G B
-- This line defines the font which is used to draw text for this program.
-The format of the line is as follows:
-	Font File			F			std::string (it will have no spaces)
-	Font Size			S			int
-	RGB Color			(R,G,B)		int, int, int
+## Build Requirements
+- C++17 or later
+- SFML 2.6+ (graphics, window, system modules)
+- Dear ImGui (with SFML backend)
+- A compatible C++ compiler (g++, clang++, MSVC)
 
-Rectangle N X Y SX SY R G B W H
-- Defines a RectangleShape with:
-	Shape Name			Name		std::string
-	Initial Position	(X,Y)		float, float
-	Initial Speed		(SX,SY)		float, float
-	RGB Color			(R,G,B)		int, int, int
-	Size				(W,H)		float, float
-
-Circle N X Y SX SY R G B R
-- Defines a RectangleShape with:
-	Shape Name			Name		std::string
-	Initial Position	(X,Y)		float, float
-	Initial Speed		(SX,SY)		float, float
-	RGB Color			(R,G,B)		int, int, int
-	Radius				R			float
-
-## Assignment Hints
-- In order to store an arbitrary number of shapes from the configuration file, you must store them in a container - std::vector is recommended
-- Consider creating a custom class or struct which stores all of the properties of a shape that are not stored within the sf::Shape class itself
-example: velocity, name, etc
-- A shape will 'touch' the side of the window if its bounding box makes contact with it. Each shape's bounding rectange can be obtained via:
-```
-shape.getLocalBounds(); // .top, .left, .width, .height
-```
-- gives the LOCAL position of the (top, left) of the rectange
-- LOCAL pos means it is relative to shape.getPosition(), not the window
-- as well as the (width, height) size of the rectangle
+## Configuration File Format
+The configuration file consists of space-seperated tokens. Lines may appear in any order.
 
 ```
-shape.getGlobalBounds
-```
-will take into account any scale, translation, etc that has been applied to the shape. May be useful for the ui scaling
+Window W H # Window resolution (integers)
 
-- Similarly, a sf::Text element's bounding rectangle can also be retrieved via text.getLocalBounds(), which will be needed to center the text properly within a shape.
-- Use c++ file reading via std::ifstream
+Font filename.ttf size R G B # Font file (no spaces), size, and default text color
+
+Rectangle Name xPos yPos velocityX velocityY R G B Width Height
+Circle Name xPos yPos velocityX velocityY R G B Radius
+```
+
+## Acknowledgements
+This program is inspired by an assignment given in COMP 4300 at Memorial University Newfoundland and 
+provides practical experience with:
+- File I/O and parsing in modern C++
+- Polymorphism and container management
+- Real-time animation and collision response
+- Integrating immediate-mode GUI toolkits
+
+Thanks.
