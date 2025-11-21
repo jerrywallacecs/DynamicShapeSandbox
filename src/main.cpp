@@ -40,7 +40,7 @@ struct shapeInfo
 
 	bool drawShape = true;
 
-	void init(float posx, float posy, sf::Color rgb)
+	void init(float posx, float posy, sf::Color& rgb)
 	{
 		if (hasRectangle)
 		{
@@ -161,11 +161,8 @@ int main(int argc, char* argv[])
 
 	sf::Clock deltaClock;
 
-	bool drawText = true; // whether or not to draw the text
-
-	sf::Font myFont;
-
 	// attempt to load the font from a file
+	sf::Font myFont;
 	if (!myFont.openFromFile(fontFile))
 	{
 		std::cerr << "Could not load font!\n";
@@ -173,15 +170,15 @@ int main(int argc, char* argv[])
 	}
 
 	// set up the text object that will be drawn in the bottom of the screen
-	sf::Text text(myFont, "Sample Text", fontSize);
+	sf::Text text(myFont, "hello world", fontSize);
+
+	// set up a character array to set the text
+	//char displayString[255] = { shapes[0].name.c_str() };
 
 	// position the top-left corner of the text so that the text aligns on the bottom
 	// text character size is in pixels, so move the text up from the bottom by its height
 	text.setPosition({ 0, windowHeight - (float)text.getCharacterSize() });
 	text.setFillColor(fontColor);
-
-	// set up a character array to set the text
-	char displayString[255] = "Sample Text";
 
 	static int currentItem = 0; // index of currently selected item
 	static const char* currentItemLabel = shapes[currentItem].name.c_str(); // we need the std::string to be a null-terminated c-style string to use the combo box
@@ -201,22 +198,7 @@ int main(int argc, char* argv[])
 				window.close();
 			}
 
-			// this event is triggered when a key is pressed
-			/*
-			if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
-			{
-				// print the key that was pressed to the console
-				std::cout << "Key pressed with code " << int(keyPressed->scancode) << '\n';
-
-				if (keyPressed->scancode == sf::Keyboard::Scancode::X)
-				{
-					circleSpeedX *= -1.0f;
-				}
-			}
-			*/
-
-			// since the keypressed is an int under the hood, we can use a switch statement
-
+			// note: the keypressed is an int under the hood, we can use a switch statement
 			if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
 			{
 				// print the key that was pressed to the console
@@ -388,11 +370,6 @@ int main(int argc, char* argv[])
 
 		// RENDERING
 		window.clear();
-
-		if (drawText)
-		{
-			window.draw(text);
-		}
 
 		// iterate through the vector and draw the shapes
 		for (int i = 0; i < shapes.size(); ++i)

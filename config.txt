@@ -1,4 +1,4 @@
-Window 1920 1080
+Window 1280 720
 Font fonts/airstrike.ttf 25 0 0 0
 Rectangle RedRect 400 300 120 -80 255 0 0 180 120
 Rectangle BlueBox 800 500 -150 90 0 100 255 240 240
