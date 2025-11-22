@@ -2,7 +2,6 @@
 #include <memory>
 #include <fstream>
 #include <vector>
-#include <cmath>
 
 #include <SFML/Graphics.hpp>
 #include <imgui-SFML.h>
