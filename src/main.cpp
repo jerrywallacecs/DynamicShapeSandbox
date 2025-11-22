@@ -2,6 +2,7 @@
 #include <memory>
 #include <fstream>
 #include <vector>
+#include <cmath>
 
 #include <SFML/Graphics.hpp>
 #include <imgui-SFML.h>
@@ -223,71 +224,14 @@ int main(int argc, char* argv[])
 		ImGui::SFML::Update(window, deltaClock.restart());
 
 		// draw the UI
-		ImGui::Begin("Shape Properties");
-
-		// with intermediate mode (imgui), we just pass in the name and a pointer to the variable it operates on
-		//ImGui::Text("Circle Settings");
-		//ImGui::Checkbox("draw circle", &drawCircle);
-		//ImGui::SameLine();
-		//ImGui::Checkbox("draw text", &drawText);
-		//ImGui::SliderFloat("radius", &circleRadius, 0.0f, 300.0f);
-		//ImGui::SliderInt("sides", &circleSegments, 3, 64);
-		//ImGui::SliderFloat("circle x speed", &circleSpeedX, -15.0f, 15.0f);
-		//ImGui::SliderFloat("circle y speed", &circleSpeedY, -15.0f, 15.0f);
+		ImGui::Begin("Shape Properties");		
 
 		/*
-		for (int i = 0; i < shapes.size(); ++i)
-		{
-			if (shapes[i].hasRectangle)
-			{
-				ImGui::PushID(i); // unique ID for checkbox
-				ImGui::Checkbox("draw rectangle", &shapes[i].drawShape);
-				ImGui::SliderFloat2("rectangle velocity", shapes[i].velocity, -5.0f, 5.0f);
-
-				ImGui::ColorEdit3("rectangle color", shapes[i].guiRGB);
-
-				if (ImGui::Button("reset rectangle"))
-				{
-					shapes[i].rectangle.setPosition({ shapes[i].initialPosition[0], shapes[i].initialPosition[1] });
-				}
-				ImGui::PopID();
-			}
-
-			if (shapes[i].hasCircle)
-			{
-				ImGui::PushID(i); // unique ID for checkbox
-				ImGui::Checkbox("draw circle", &shapes[i].drawShape);
-				ImGui::SliderInt("sides", &shapes[i].segments, 3, 64);
-				ImGui::SliderFloat2("circle velocity", shapes[i].velocity, -5.0f, 5.0f);
-
-				ImGui::ColorEdit3("circle color", shapes[i].guiRGB);
-
-				if (ImGui::Button("reset circle"))
-				{
-					shapes[i].circle.setPosition({ shapes[i].initialPosition[0], shapes[i].initialPosition[1] });
-				}
-				ImGui::PopID();
-			}
-		ImGui::PushID(i); // unique ID for checkbox
-		ImGui::Checkbox("draw rectangle", &shapes[i].drawShape);
-		ImGui::SliderFloat2("rectangle velocity", shapes[i].velocity, -5.0f, 5.0f);
-
-		ImGui::ColorEdit3("rectangle color", shapes[i].guiRGB);
-
 		if (ImGui::Button("reset rectangle"))
 		{
 			shapes[i].rectangle.setPosition({ shapes[i].initialPosition[0], shapes[i].initialPosition[1] });
 		}
 		ImGui::PopID();
-		}
-
-		*/
-
-		/*
-		ImGui::InputText("text", displayString, 255);
-		if (ImGui::Button("set text"))
-		{
-			text.setString(displayString);
 		}
 		*/
 
@@ -316,10 +260,12 @@ int main(int argc, char* argv[])
 		case ShapeType::Rectangle:
 			ImGui::Checkbox("Draw Shape", &shapes[currentItem].drawShape);
 			ImGui::SliderFloat("Scale", &shapes[currentItem].scale, 0.1f, 5.0f);
-			ImGui::SliderFloat2("Velocity", shapes[currentItem].velocity, -5.0f, 5.0f);
+			ImGui::SliderFloat2("Velocity", shapes[currentItem].velocity, -50.0f, 50.0f);
 			ImGui::ColorEdit3("Color", shapes[currentItem].guiRGB);
+
 			// updates the name buffer with the std::string
 			updateNameBuffer(shapes[currentItem]);
+
 			// instead of using a set name button, we just type in the name and it updates automatically
 			if (ImGui::InputText("Name", shapes[currentItem].nameBuffer, sizeof(shapes[currentItem].nameBuffer)))
 			{
@@ -330,7 +276,7 @@ int main(int argc, char* argv[])
 			ImGui::Checkbox("Draw Shape", &shapes[currentItem].drawShape);
 			ImGui::SliderFloat("Radius", &shapes[currentItem].radius, 0.1f, 500.0f);
 			ImGui::SliderInt("Sides", &shapes[currentItem].segments, 3, 64);
-			ImGui::SliderFloat2("Velocity", shapes[currentItem].velocity, -5.0f, 5.0f);
+			ImGui::SliderFloat2("Velocity", shapes[currentItem].velocity, -50.0f, 50.0f);
 			ImGui::ColorEdit3("Color", shapes[currentItem].guiRGB);
 			break;
 		}
@@ -351,11 +297,25 @@ int main(int argc, char* argv[])
 
 			if (shapes[i].hasCircle)
 			{
-				if (shapes[i].circle.getPosition().x < 0 || shapes[i].circle.getPosition().x + (2 * shapes[i].radius) > windowWidth)
-					shapes[i].velocity[0] *= -1;
+				if (shapes[i].segments > 3) // if ngon
+				{
+					if (shapes[i].circle.getPosition().x < 0 || shapes[i].circle.getPosition().x + (2 * shapes[i].radius) > windowWidth)
+						shapes[i].velocity[0] *= -1;
 
-				if (shapes[i].circle.getPosition().y < 0 || shapes[i].circle.getPosition().y + (2 * shapes[i].radius) > windowHeight)
-					shapes[i].velocity[1] *= -1;
+					if (shapes[i].circle.getPosition().y < 0 || shapes[i].circle.getPosition().y + (2 * shapes[i].radius) > windowHeight)
+						shapes[i].velocity[1] *= -1;
+				}
+				else if (shapes[i].segments == 3) // if triangle
+				{
+					if (shapes[i].circle.getPosition().x < 0 || shapes[i].circle.getPosition().x + (2 * shapes[i].radius) > windowWidth)
+						shapes[i].velocity[0] *= -1;
+					if (shapes[i].circle.getPosition().y < 0 || shapes[i].circle.getPosition().y + (1.5 * shapes[i].radius) > windowHeight)
+						shapes[i].velocity[1] *= -1;
+				}
+				else
+				{
+					std::cerr << "invalid segment" << '\n';
+				}
 			}
 		}
 
