@@ -35,7 +35,7 @@ struct shapeInfo
 	sf::RectangleShape rectangle;
 	sf::CircleShape circle;
 
-	ShapeType type;
+	ShapeType type = {};
 
 	bool hasRectangle = false;
 	bool hasCircle = false;
@@ -59,10 +59,13 @@ struct shapeInfo
 
 	void animate(float speedx, float speedy)
 	{
-		if (hasRectangle)
-			rectangle.setPosition({ rectangle.getPosition().x + speedx, rectangle.getPosition().y + speedy });
-		if (hasCircle)
-			circle.setPosition({ circle.getPosition().x + speedx, circle.getPosition().y + speedy });
+		if (drawShape) // shape only moves if we are drawing it to the screen.
+		{
+			if (hasRectangle)
+				rectangle.setPosition({ rectangle.getPosition().x + speedx, rectangle.getPosition().y + speedy });
+			if (hasCircle)
+				circle.setPosition({ circle.getPosition().x + speedx, circle.getPosition().y + speedy });
+		}
 	}
 };
 
