@@ -21,6 +21,7 @@ struct shapeInfo
 	float initialPosition[2] = {};
 
 	float velocity[2] = {};
+	float initialVelocity[2] = {};
 
 	float sfmlRGB[3] = { 255, 255, 255 };
 	float guiRGB[3] = {};
@@ -119,6 +120,9 @@ int main(int argc, char* argv[])
 			info.hasRectangle = true;
 			info.type = ShapeType::Rectangle;
 
+			info.initialVelocity[0] = info.velocity[0];
+			info.initialVelocity[1] = info.velocity[1];
+
 			info.rgbColor = sf::Color(static_cast<uint8_t>(info.sfmlRGB[0]), static_cast<uint8_t>(info.sfmlRGB[1]), static_cast<uint8_t>(info.sfmlRGB[2]));
 			
 			info.guiRGB[0] = info.sfmlRGB[0] / 255;
@@ -141,6 +145,8 @@ int main(int argc, char* argv[])
 			info.hasCircle = true;
 			info.type = ShapeType::Circle;
 
+			info.initialVelocity[0] = info.velocity[0];
+			info.initialVelocity[1] = info.velocity[1];
 
 			info.rgbColor = sf::Color(static_cast<uint8_t>(info.sfmlRGB[0]), static_cast<uint8_t>(info.sfmlRGB[1]), static_cast<uint8_t>(info.sfmlRGB[2]));
 
@@ -270,6 +276,14 @@ int main(int argc, char* argv[])
 			{
 				shapes[currentItem].name = shapes[currentItem].nameBuffer;
 			}
+
+			// reset shape to initial state defined by config
+			if (ImGui::Button("Reset"))
+			{
+				shapes[currentItem].rectangle.setPosition({ shapes[currentItem].initialPosition[0], shapes[currentItem].initialPosition[1] });
+				shapes[currentItem].velocity[0] = shapes[currentItem].initialVelocity[0];
+				shapes[currentItem].velocity[1] = shapes[currentItem].initialVelocity[1];
+			}
 			break;
 		case ShapeType::Circle:
 			ImGui::Checkbox("Draw Shape", &shapes[currentItem].drawShape);
@@ -277,6 +291,19 @@ int main(int argc, char* argv[])
 			ImGui::SliderInt("Sides", &shapes[currentItem].segments, 3, 64);
 			ImGui::SliderFloat2("Velocity", shapes[currentItem].velocity, -50.0f, 50.0f);
 			ImGui::ColorEdit3("Color", shapes[currentItem].guiRGB);
+
+			updateNameBuffer(shapes[currentItem]);
+			if (ImGui::InputText("Name", shapes[currentItem].nameBuffer, sizeof(shapes[currentItem].nameBuffer)))
+			{
+				shapes[currentItem].name = shapes[currentItem].nameBuffer;
+			}
+
+			if (ImGui::Button("Reset"))
+			{
+				shapes[currentItem].circle.setPosition({ shapes[currentItem].initialPosition[0], shapes[currentItem].initialPosition[1] });
+				shapes[currentItem].velocity[0] = shapes[currentItem].initialVelocity[0];
+				shapes[currentItem].velocity[1] = shapes[currentItem].initialVelocity[1];
+			}
 			break;
 		}
 
